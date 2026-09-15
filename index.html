@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>三年一班 智慧大電視聯絡簿</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: 芫荽 (Iansui) 注音字體與 Noto Sans TC -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Iansui&family=JetBrains+Mono:wght@700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-page: #f8f9fb;
+      --card-bg: #ffffff;
+      --border-soft: #edf0f5;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+    }
+
+    body.theme-chalkboard {
+      --bg-page: #14241d;
+      --card-bg: #1c362b;
+      --border-soft: #2a4c3d;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      font-family: 'Noto Sans TC', 'Iansui', sans-serif;
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+
+    .font-clock {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* 大電視專用字體尺寸階梯 */
+    .tv-scale-lg { font-size: 1.05rem; }
+    .tv-scale-lg .item-text { font-size: 1.45rem; line-height: 2.2rem; }
+    .tv-scale-lg .card-title { font-size: 1.65rem; }
+
+    .tv-scale-xl { font-size: 1.25rem; }
+    .tv-scale-xl .item-text { font-size: 1.85rem; line-height: 2.7rem; }
+    .tv-scale-xl .card-title { font-size: 1.95rem; }
+
+    .tv-scale-2xl { font-size: 1.45rem; }
+    .tv-scale-2xl .item-text { font-size: 2.25rem; line-height: 3.2rem; }
+    .tv-scale-2xl .card-title { font-size: 2.35rem; }
+
+    /* 注音拼音標註排版 */
+    ruby {
+      ruby-align: center;
+      ruby-position: over;
+    }
+    rt {
+      font-size: 0.52em;
+      letter-spacing: 0.04em;
+      color: currentColor;
+      opacity: 0.88;
+      user-select: none;
+      font-family: 'Iansui', 'Noto Sans TC', sans-serif;
+    }
+    body.no-zhuyin rt {
+      display: none !important;
+    }
+
+    /* 科目色彩標籤 */
+    .subject-tag-chinese { background-color: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
+    .subject-tag-math { background-color: #dbeafe; color: #2563eb; border: 1px solid #93c5fd; }
+    .subject-tag-english { background-color: #ccfbf1; color: #0d9488; border: 1px solid #99f6e4; }
+    .subject-tag-science { background-color: #dcfce7; color: #16a34a; border: 1px solid #86efac; }
+    .subject-tag-social { background-color: #ffedd5; color: #ea580c; border: 1px solid #fdba74; }
+    .subject-tag-art { background-color: #f3e8ff; color: #9333ea; border: 1px solid #d8b4fe; }
+    .subject-tag-life { background-color: #ecfdf5; color: #059669; border: 1px solid #6ee7b7; }
+    .subject-tag-read { background-color: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
+    .subject-tag-default { background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+  </style>
+</head>
+
+<body class="tv-scale-xl no-zhuyin min-h-screen flex flex-col p-4 md:p-6 select-none">
+  <script>
+    const DEFAULT_BOARD_DATA = {
+      duties: "5號、6號",
+      lifeGoal: "載入中...",
+      noticeBanner: "",
+      homework: [
+        { id: "h1", subject: "國語", content: "國語習作第 42 至 45 頁並確實訂正", visible: true },
+        { id: "h2", subject: "數學", content: "數學習作第 38 頁 ( 完成第四單元練習 )", visible: true },
+        { id: "h3", subject: "英語", content: "複習 Unit 3 單字音檔並簽名", visible: true }
+      ],
+      supplies: [
+        { id: "s1", content: "藝術用具 ( 剪刀、白膠、旋轉蠟筆 )", visible: true },
+        { id: "s2", content: "水壺 ( 請裝滿溫開水 )", visible: true }
+      ],
+      notices: [
+        { id: "n1", content: "明早 8:00 前完成交聯絡簿與作業。", visible: true },
+        { id: "n2", content: "天氣早晚溫差大，出門請攜帶薄外套。", visible: true }
+      ]
+    };
+
+    function getTodayString() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    const WEEKDAYS_ZH = ["日", "一", "二", "三", "四", "五", "六"];
+
+    window.appState = {
+      theme: 'light',
+      scale: 'xl',
+      zhuyinEnabled: false,
+      currentDate: getTodayString(),
+      records: {
+        [getTodayString()]: JSON.parse(JSON.stringify(DEFAULT_BOARD_DATA))
+      },
+      calendarYear: new Date().getFullYear(),
+      calendarMonth: new Date().getMonth()
+    };
+  </script>
+
+  <!-- 頂部資訊列 -->
+  <header class="bg-white rounded-3xl shadow-sm border p-4 md:p-5 mb-4 flex flex-wrap items-center justify-between gap-4" style="border-color: var(--border-soft);">
+    <!-- 班級標題與日期月曆 -->
+    <div class="flex flex-col gap-2">
+      <div class="flex items-center gap-3">
+        <!-- 橘黃色立體書本圖示 -->
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-500 shadow-md flex items-center justify-center text-white text-2xl flex-shrink-0">
+          📖
+        </div>
+        <h1 class="text-3xl md:text-4xl font-black tracking-tight text-slate-800 flex items-center gap-3">
+          三年一班 智慧大電視聯絡簿
+        </h1>
+        <!-- 即時連線狀態標籤 -->
+        <div id="syncBadge" class="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-600 border border-emerald-200 shadow-sm">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span id="syncText">即時連線中</span>
+        </div>
+      </div>
+
+      <!-- 日期與月曆快選按鈕 -->
+      <div class="flex items-center gap-3 text-slate-600 font-bold text-base md:text-lg pl-1">
+        <span id="dateFullDisplay">載入中...</span>
+        <div class="relative inline-block">
+          <button id="calendarToggleBtn" onclick="toggleCalendarModal()" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-sm font-bold transition shadow-xs">
+            <span>📅 月曆 (今天)</span>
+            <span class="text-xs">▼</span>
+          </button>
+
+          <!-- 彈出式月曆視窗 (週六週日紅字) -->
+          <div id="calendarModal" class="hidden absolute left-0 top-11 z-50 w-80 bg-white rounded-2xl shadow-2xl border p-4 text-slate-800" style="border-color: #cbd5e1;">
+            <div class="flex items-center justify-between pb-3 mb-2 border-b">
+              <button onclick="changeCalMonth(-1)" class="p-1.5 rounded-lg hover:bg-slate-100 text-lg font-bold">◀</button>
+              <div class="flex items-center gap-1 font-bold">
+                <select id="calYearSelect" onchange="onYearMonthChange()" class="p-1 border rounded bg-slate-50 text-sm"></select>
+                <select id="calMonthSelect" onchange="onYearMonthChange()" class="p-1 border rounded bg-slate-50 text-sm"></select>
+              </div>
+              <button onclick="changeCalMonth(1)" class="p-1.5 rounded-lg hover:bg-slate-100 text-lg font-bold">▶</button>
+            </div>
+            <div class="grid grid-cols-7 gap-1 text-center font-bold text-sm mb-2">
+              <span class="text-red-500">日</span>
+              <span>一</span>
+              <span>二</span>
+              <span>三</span>
+              <span>四</span>
+              <span>五</span>
+              <span class="text-red-500">六</span>
+            </div>
+            <div id="calendarDaysGrid" class="grid grid-cols-7 gap-1 text-center text-base"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右側功能操作按鈕群組與電子時鐘 -->
+    <div class="flex flex-wrap items-center gap-2.5">
+      <!-- 數位時鐘卡片 -->
+      <div class="bg-slate-100/90 border border-slate-200/80 rounded-2xl px-4 py-2 font-clock font-bold text-2xl tracking-wider text-slate-800 shadow-inner flex items-center justify-center">
+        <span id="digitalClock">00:15:54</span>
+      </div>
+
+      <!-- 注音開關 -->
+      <button id="zhuyinBtn" onclick="toggleZhuyin()" class="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-base transition shadow-sm">
+        <span class="text-sm">文<sub class="text-[10px]">A</sub></span>
+        <span id="zhuyinStatusText">注音：關</span>
+      </button>
+
+      <!-- 字體縮放按鈕 -->
+      <button onclick="cycleTextScale()" class="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-base transition shadow-sm">
+        <span>🔍</span>
+        <span>字體：<span id="scaleLabel">特大</span></span>
+      </button>
+
+      <!-- 深色黑板切換 -->
+      <button onclick="toggleTheme()" class="p-2.5 rounded-2xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-lg transition shadow-sm" title="切換黑板/亮色模式">
+        🌙
+      </button>
+
+      <!-- 全螢幕切換 -->
+      <button onclick="toggleFullscreen()" class="p-2.5 rounded-2xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-lg transition shadow-sm" title="全螢幕切換">
+        ⛶
+      </button>
+
+      <!-- 教師專區登入 (亮橘黃色按鈕) -->
+      <button onclick="openTeacherAuthModal()" class="flex items-center gap-1.5 px-5 py-2.5 rounded-2xl font-black text-base bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-md hover:shadow-lg transition">
+        <span>🔒</span>
+        <span>教師專區</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 復原：今日重大提醒紅色橫幅欄位 (完全比照截圖) -->
+  <section id="noticeBannerSection" class="mb-5 rounded-3xl p-3 md:p-3.5 bg-gradient-to-r from-red-600 via-rose-600 to-red-600 text-white shadow-md flex items-center gap-3.5 min-h-[60px]">
+    <div class="flex-shrink-0 px-4 py-2 rounded-2xl bg-white/20 backdrop-blur-sm font-black text-base md:text-lg tracking-wider flex items-center gap-2 border border-white/30 shadow-inner">
+      <span>📢</span> 今日重大提醒
+    </div>
+    <div id="noticeBannerText" class="flex-1 font-black text-lg md:text-2xl tracking-wide truncate text-white/95"></div>
+  </section>
+
+  <!-- 看板主體 -->
+  <main class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+    <!-- 左側欄位：今日作業 + 下方雙卡片 (值日生座號 與 每日本週生活目標) -->
+    <div class="lg:col-span-7 flex flex-col gap-5">
+      <!-- 今日作業主卡片 -->
+      <section class="bg-white rounded-3xl p-6 border shadow-sm flex-1 flex flex-col" style="border-color: var(--border-soft);">
+        <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
+          <div class="flex items-center gap-3">
+            <span class="w-2.5 h-8 bg-blue-600 rounded-full inline-block"></span>
+            <h2 class="card-title font-black text-slate-800 tracking-tight">今日聯絡簿作業</h2>
+          </div>
+          <span id="hwCountBadge" class="px-3 py-1 rounded-full text-sm font-bold bg-blue-50 text-blue-600 border border-blue-100">
+            共 3 項
+          </span>
+        </div>
+
+        <!-- 作業清單容器 -->
+        <div id="homeworkContainer" class="flex-1 space-y-3.5 flex flex-col justify-start"></div>
+      </section>
+
+      <!-- 左側下方雙卡片：值日生座號 與 每日本週生活目標 -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- 值日生座號卡片 (綠色人物圖示) -->
+        <div class="bg-white rounded-3xl p-4 border shadow-sm flex items-center gap-3.5" style="border-color: var(--border-soft);">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center text-2xl flex-shrink-0 shadow-sm">
+            👤
+          </div>
+          <div class="flex flex-col">
+            <span class="text-xs font-bold text-slate-400">值日生座號</span>
+            <span id="dutiesDisplay" class="text-xl md:text-2xl font-black text-slate-800">5號、6號</span>
+          </div>
+        </div>
+
+        <!-- 每日本週生活目標卡片 (紫色星芒圖示) -->
+        <div class="bg-white rounded-3xl p-4 border shadow-sm flex items-center gap-3.5" style="border-color: var(--border-soft);">
+          <div class="w-12 h-12 rounded-2xl bg-purple-600 text-white flex items-center justify-center text-2xl flex-shrink-0 shadow-sm">
+            ✨
+          </div>
+          <div class="flex flex-col">
+            <span class="text-xs font-bold text-slate-400">每日本週生活目標</span>
+            <span id="lifeGoalDisplay" class="text-xl md:text-2xl font-black text-slate-800">載入中...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右側欄位：明日必備用具 與 生活提醒與交代事項 -->
+    <div class="lg:col-span-5 flex flex-col gap-5">
+      <!-- 明日必備用具 (橘黃打勾圓圈) -->
+      <section class="bg-white rounded-3xl p-6 border shadow-sm flex flex-col" style="border-color: var(--border-soft);">
+        <div class="flex items-center gap-3 pb-3 mb-3 border-b border-slate-100">
+          <span class="w-2.5 h-8 bg-amber-500 rounded-full inline-block"></span>
+          <h2 class="card-title font-black text-slate-800 tracking-tight">明日必備用具</h2>
+        </div>
+        <div id="suppliesContainer" class="flex-1 space-y-3"></div>
+      </section>
+
+      <!-- 生活提醒與交代事項 (綠色 ⓘ 圓圈) -->
+      <section class="bg-white rounded-3xl p-6 border shadow-sm flex-1 flex flex-col" style="border-color: var(--border-soft);">
+        <div class="flex items-center gap-3 pb-3 mb-3 border-b border-slate-100">
+          <span class="w-2.5 h-8 bg-emerald-500 rounded-full inline-block"></span>
+          <h2 class="card-title font-black text-slate-800 tracking-tight">生活提醒與交代事項</h2>
+        </div>
+        <div id="noticesContainer" class="flex-1 space-y-2.5"></div>
+      </section>
+    </div>
+  </main>
+
+  <!-- 教師登入密碼彈窗 -->
+  <div id="authModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl text-slate-800 border border-slate-100">
+      <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center text-3xl">
+        🔒
+      </div>
+      <h3 class="text-2xl font-black text-center mb-1">進入教師專區</h3>
+      <p class="text-sm text-center text-slate-400 mb-4">請輸入密碼以編輯看板內容</p>
+      
+      <input type="password" id="authPwdInput" placeholder="請輸入管理密碼" class="w-full px-4 py-3 border border-slate-300 rounded-2xl mb-2 text-center text-xl tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50" />
+      <div id="authErrorMsg" class="hidden text-rose-500 text-sm font-bold text-center mb-3">密碼錯誤，請重新輸入！</div>
+
+      <div class="flex gap-2.5 pt-2">
+        <button onclick="closeTeacherAuthModal()" class="flex-1 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 font-bold text-slate-600 transition">取消</button>
+        <button onclick="verifyTeacherPwd()" class="flex-1 py-3 rounded-2xl bg-amber-500 hover:bg-amber-600 font-black text-white shadow-md transition">確認進入</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 教師專區編輯器彈窗 -->
+  <div id="editorModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 md:p-6">
+    <div class="bg-white rounded-3xl max-w-4xl w-full max-h-[92vh] flex flex-col shadow-2xl text-slate-800 overflow-hidden border border-slate-100">
+      <div class="flex items-center justify-between p-5 border-b bg-slate-50">
+        <div class="flex items-center gap-2.5">
+          <span class="text-2xl">🛠️</span>
+          <h3 class="text-xl font-black text-slate-800">
+            教師專區：編輯聯絡簿內容
+          </h3>
+          <span id="editorDateBadge" class="text-sm px-3 py-1 rounded-full font-bold bg-blue-100 text-blue-700"></span>
+        </div>
+        <button onclick="closeEditorModal()" class="p-1 text-slate-400 hover:text-slate-600 font-bold text-2xl">✕</button>
+      </div>
+
+      <div class="p-5 md:p-6 overflow-y-auto space-y-6 flex-1 text-base">
+        <!-- 復原：今日重大提醒編輯欄位 -->
+        <div>
+          <label class="block font-bold mb-1 text-rose-600 flex items-center gap-1.5">
+            <span>📢 今日重大提醒</span>
+            <span class="text-xs text-slate-400 font-normal">（文字將以大字體呈現在頂端紅色橫幅中）</span>
+          </label>
+          <input type="text" id="editNoticeBanner" placeholder="例如：明天穿運動服、下週一全校防災演練..." class="w-full px-3.5 py-2.5 border rounded-xl focus:outline-blue-500 bg-slate-50" />
+        </div>
+
+        <!-- 值日生座號 與 本週生活目標 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold mb-1 text-slate-700">👤 值日生座號</label>
+            <input type="text" id="editDuties" placeholder="例如：5號、6號" class="w-full px-3.5 py-2.5 border rounded-xl focus:outline-blue-500 bg-slate-50" />
+          </div>
+          <div>
+            <label class="block font-bold mb-1 text-purple-700">✨ 每日本週生活目標</label>
+            <input type="text" id="editLifeGoal" placeholder="例如：保持微笑，友愛同學，自主學習" class="w-full px-3.5 py-2.5 border rounded-xl focus:outline-blue-500 bg-slate-50" />
+          </div>
+        </div>
+
+        <!-- 今日作業編輯清單 -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <label class="font-bold flex items-center gap-1.5 text-blue-600">
+              <span>✏️ 今日作業</span>
+              <span class="text-xs text-slate-400 font-normal">（未勾選「顯示」則保留於系統，不顯示於大電視）</span>
+            </label>
+            <button onclick="addEditItem('homework')" class="text-xs px-3 py-1.5 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 font-bold transition">+ 新增作業</button>
+          </div>
+          <div id="editHomeworkList" class="space-y-2.5"></div>
+        </div>
+
+        <!-- 明日必備用品編輯清單 -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <label class="font-bold flex items-center gap-1.5 text-amber-600">
+              <span>🎒 明日必備用品</span>
+              <span class="text-xs text-slate-400 font-normal">（勾選「顯示」才會推播）</span>
+            </label>
+            <button onclick="addEditItem('supplies')" class="text-xs px-3 py-1.5 bg-amber-50 text-amber-700 rounded-xl hover:bg-amber-100 font-bold transition">+ 新增用品</button>
+          </div>
+          <div id="editSuppliesList" class="space-y-2.5"></div>
+        </div>
+
+        <!-- 生活提醒與交代事項編輯清單 -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <label class="font-bold flex items-center gap-1.5 text-emerald-600">
+              <span>📢 生活提醒與交代事項</span>
+              <span class="text-xs text-slate-400 font-normal">（勾選「顯示」才會推播）</span>
+            </label>
+            <button onclick="addEditItem('notices')" class="text-xs px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-xl hover:bg-emerald-100 font-bold transition">+ 新增事項</button>
+          </div>
+          <div id="editNoticesList" class="space-y-2.5"></div>
+        </div>
+      </div>
+
+      <div class="p-4 border-t bg-slate-50 flex items-center justify-end gap-3">
+        <button onclick="closeEditorModal()" class="px-5 py-2.5 rounded-2xl bg-slate-200 hover:bg-slate-300 font-bold transition">取消</button>
+        <button onclick="saveEditorData()" class="px-6 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-md transition">
+          儲存並即時廣播至大電視
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const ZHUYIN_DICT = {
+      "國": "ㄍㄨㄛˊ", "語": "ㄩˇ", "數": "ㄕㄨˋ", "學": "ㄒㄩㄝˊ", "作": "ㄗㄨㄛˋ", "業": "ㄧㄝˋ",
+      "第": "ㄉㄧˋ", "十": "ㄕˊ", "課": "ㄎㄜˋ", "生": "ㄕㄥ", "字": "ㄗˋ", "詞": "ㄘˊ",
+      "各": "ㄍㄜˋ", "寫": "ㄒㄧㄝˇ", "次": "ㄘˋ", "習": "ㄒㄧˊ", "頁": "ㄧㄝˋ", "閱": "ㄩㄝˋ",
+      "讀": "ㄉㄨˊ", "外": "ㄨㄞˋ", "物": "ㄨˋ", "分": "ㄈㄣ", "鐘": "ㄓㄨㄥ", "並": "ㄅㄧㄥˋ",
+      "簽": "ㄑㄧㄢ", "名": "ㄇㄧㄥˊ", "活": "ㄏㄨㄛˊ", "幫": "ㄅㄤ", "忙": "ㄇㄤˊ",
+      "做": "ㄗㄨㄛˋ", "一": "ㄧ", "件": "ㄐㄧㄢˋ", "家": "ㄐㄧㄚ", "事": "ㄕˋ", "藝": "ㄧˋ",
+      "術": "ㄕㄨˋ", "用": "ㄩㄥˋ", "具": "ㄐㄩˋ", "彩": "ㄘㄞˇ", "色": "ㄙㄜˋ", "筆": "ㄅㄧˇ",
+      "剪": "ㄐㄧㄢˇ", "刀": "ㄉㄠ", "膠": "ㄐㄧㄠ", "水": "ㄕㄨㄟˇ", "跳": "ㄊㄧㄠˋ", "繩": "ㄕㄥˊ",
+      "潔": "ㄐㄧㄝˊ", "牙": "ㄧㄚˊ", "組": "ㄗㄨˇ", "借": "ㄐㄧㄝˋ", "書": "ㄕㄨ", "證": "ㄓㄥˋ",
+      "本": "ㄅㄣˇ", "明": "ㄇㄧㄥˊ", "日": "ㄖˋ", "二": "ㄦˋ", "節": "ㄐㄧㄝˊ", "為": "ㄨㄟˊ",
+      "全": "ㄑㄩㄢˊ", "校": "ㄒㄧㄠˋ", "防": "ㄈㄤˊ", "災": "ㄗㄞ", "演": "ㄧㄢˇ", "練": "ㄌㄧㄢˋ",
+      "請": "ㄑㄧㄥˇ", "準": "ㄓㄨㄣˇ", "時": "ㄕˊ", "到": "ㄉㄠˋ", "天": "ㄊㄧㄢ", "氣": "ㄑㄧˋ",
+      "漸": "ㄐㄧㄢˋ", "涼": "ㄌㄧㄤˊ", "記": "ㄐㄧˋ", "得": "ㄉㄜˊ", "攜": "ㄒㄧ", "帶": "ㄉㄞˋ",
+      "薄": "ㄅㄠˊ", "套": "ㄊㄠˋ", "保": "ㄅㄠˇ", "暖": "ㄋㄨㄢˇ", "座": "ㄗㄨㄛˋ", "號": "ㄏㄠˋ",
+      "確": "ㄑㄩㄝˋ", "實": "ㄕˊ", "訂": "ㄉㄧㄥˋ", "正": "ㄓㄥˋ", "完": "ㄨㄢˊ", "成": "ㄔㄥˊ",
+      "四": "ㄙˋ", "單": "ㄉㄢ", "元": "ㄩㄢˊ", "英": "ㄧㄥ", "複": "ㄈㄨˋ", "音": "ㄧㄣ",
+      "檔": "ㄉㄤˇ", "旋": "ㄒㄩㄢˊ", "轉": "ㄓㄨㄢˇ", "蠟": "ㄌㄚˋ", "壺": "ㄏㄨˊ", "裝": "ㄓㄨㄤ",
+      "滿": "ㄇㄢˇ", "溫": "ㄨㄣ", "開": "ㄎㄞ", "早": "ㄗㄠˇ", "交": "ㄐㄧㄠ", "差": "ㄔㄚ",
+      "出": "ㄔㄨ", "門": "ㄇㄣˊ", "微": "ㄨㄟˊ", "笑": "ㄒㄧㄠˋ", "友": "ㄧㄡˇ", "愛": "ㄞˋ",
+      "同": "ㄊㄨㄥˊ", "自": "ㄗˋ", "主": "ㄓㄨˇ"
+    };
+
+    function renderZhuyinHtml(text) {
+      if (!text) return "";
+      let html = "";
+      for (const char of text) {
+        if (ZHUYIN_DICT[char]) {
+          html += `<ruby>${char}<rt>${ZHUYIN_DICT[char]}</rt></ruby>`;
+        } else {
+          html += char;
+        }
+      }
+      return html;
+    }
+
+    function getSubjectTagClass(subject) {
+      switch (subject) {
+        case "國語": return "subject-tag-chinese";
+        case "數學": return "subject-tag-math";
+        case "英語": return "subject-tag-english";
+        case "自然": return "subject-tag-science";
+        case "社會": return "subject-tag-social";
+        case "藝術": return "subject-tag-art";
+        case "生活": return "subject-tag-life";
+        case "閱讀": return "subject-tag-read";
+        default: return "subject-tag-default";
+      }
+    }
+  </script>
+
+  <!-- Firebase 11 模組連線設定 -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { 
+      getFirestore, 
+      doc, 
+      setDoc, 
+      onSnapshot 
+    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+    // 專屬 Firebase 金鑰配置 (my-class-tv)
+    const firebaseConfig = {
+      apiKey: "AIzaSyA31S3iEZqJbgOo2PGNH_YwsfKJ9jIcQh0",
+      authDomain: "my-class-tv.firebaseapp.com",
+      projectId: "my-class-tv",
+      storageBucket: "my-class-tv.firebasestorage.app",
+      messagingSenderId: "34180660020",
+      appId: "1:34180660020:web:9ced76c42ccd22189c5ae1"
+    };
+
+    let db = null;
+    try {
+      const app = initializeApp(firebaseConfig);
+      db = getFirestore(app);
+      updateSyncStatus(true, "即時連線中");
+    } catch (err) {
+      console.warn("Firebase 初始化提示:", err);
+      updateSyncStatus(false, "離線模式");
+    }
+
+    let unsubscribeCurrent = null;
+
+    window.listenToDateRecord = function(dateStr) {
+      if (!db) {
+        renderAll();
+        return;
+      }
+
+      if (unsubscribeCurrent) {
+        unsubscribeCurrent();
+      }
+
+      const docRef = doc(db, "artifacts", "my-class-tv", "public", "data", "class_board", dateStr);
+      updateSyncStatus(true, "雲端連線中");
+
+      unsubscribeCurrent = onSnapshot(docRef, (snapshot) => {
+        if (snapshot.exists()) {
+          const cloudData = snapshot.data();
+          window.appState.records[dateStr] = cloudData;
+        } else {
+          if (!window.appState.records[dateStr]) {
+            window.appState.records[dateStr] = JSON.parse(JSON.stringify(DEFAULT_BOARD_DATA));
+          }
+        }
+        renderAll();
+        updateSyncStatus(true, "即時連線中");
+      }, (error) => {
+        console.warn("Firestore 監聽通知:", error);
+        updateSyncStatus(false, "離線快取中");
+        renderAll();
+      });
+    };
+
+    window.saveCurrentDateToFirebase = async function(dateStr, data) {
+      if (!db) return;
+      try {
+        updateSyncStatus(true, "廣播同步中...");
+        const docRef = doc(db, "artifacts", "my-class-tv", "public", "data", "class_board", dateStr);
+        await setDoc(docRef, data);
+        updateSyncStatus(true, "即時連線中");
+      } catch (e) {
+        console.error("Firestore 儲存失敗:", e);
+        updateSyncStatus(false, "儲存至本機");
+      }
+    };
+
+    window.addEventListener('DOMContentLoaded', () => {
+      window.listenToDateRecord(window.appState.currentDate);
+    });
+  </script>
+
+  <script>
+    function getCurrentData() {
+      const date = window.appState.currentDate;
+      if (!window.appState.records[date]) {
+        window.appState.records[date] = JSON.parse(JSON.stringify(DEFAULT_BOARD_DATA));
+      }
+      return window.appState.records[date];
+    }
+
+    function updateSyncStatus(online, message) {
+      const badge = document.getElementById("syncBadge");
+      const text = document.getElementById("syncText");
+      if (!badge || !text) return;
+
+      if (online) {
+        badge.className = "flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-600 border border-emerald-200 shadow-sm";
+        badge.children[0].className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
+      } else {
+        badge.className = "flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-600 border border-amber-200 shadow-sm";
+        badge.children[0].className = "w-2.5 h-2.5 rounded-full bg-amber-500";
+      }
+      text.innerText = message;
+    }
+
+    // 數位電子時鐘走動
+    function startDigitalClock() {
+      function updateClock() {
+        const now = new Date();
+        const h = String(now.getHours()).padStart(2, '0');
+        const m = String(now.getMinutes()).padStart(2, '0');
+        const s = String(now.getSeconds()).padStart(2, '0');
+        const el = document.getElementById("digitalClock");
+        if (el) el.innerText = `${h}:${m}:${s}`;
+      }
+      updateClock();
+      setInterval(updateClock, 1000);
+    }
+    startDigitalClock();
+
+    // 渲染整個大電視畫面
+    function renderAll() {
+      const data = getCurrentData();
+
+      // 日期標題
+      const d = new Date(window.appState.currentDate + "T00:00:00");
+      const weekday = WEEKDAYS_ZH[d.getDay()] || "一";
+      document.getElementById("dateFullDisplay").innerText = `${d.getFullYear()} 年 ${d.getMonth() + 1} 月 ${d.getDate()} 日 星期${weekday}`;
+      
+      // 值日生 與 每日本週生活目標
+      document.getElementById("dutiesDisplay").innerText = data.duties || "5號、6號";
+      document.getElementById("lifeGoalDisplay").innerText = data.lifeGoal || "載入中...";
+
+      // 復原：今日重大提醒紅色橫幅文字
+      const bannerTextEl = document.getElementById("noticeBannerText");
+      if (bannerTextEl) {
+        bannerTextEl.innerText = data.noticeBanner || "";
+      }
+
+      // 今日作業清單
+      const hwContainer = document.getElementById("homeworkContainer");
+      const visibleHomework = (data.homework || []).filter(item => item.visible !== false);
+      document.getElementById("hwCountBadge").innerText = `共 ${visibleHomework.length} 項`;
+
+      if (visibleHomework.length === 0) {
+        hwContainer.innerHTML = `<div class="p-8 text-center text-slate-400 font-bold text-xl">今日尚無指派作業 🎉</div>`;
+      } else {
+        hwContainer.innerHTML = visibleHomework.map((item, idx) => `
+          <div class="flex items-center gap-3.5 p-3.5 rounded-2xl bg-slate-100/70 border border-slate-200/80 shadow-xs">
+            <span class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-300/80 text-slate-700 font-black text-base flex-shrink-0">
+              ${idx + 1}
+            </span>
+            <span class="px-3 py-1 rounded-xl text-base font-black ${getSubjectTagClass(item.subject)} flex-shrink-0">
+              ${renderZhuyinHtml(item.subject)}
+            </span>
+            <span class="item-text font-bold text-slate-800 tracking-wide flex-1">
+              ${renderZhuyinHtml(item.content)}
+            </span>
+          </div>
+        `).join('');
+      }
+
+      // 明日必備用品 (淡橘底 + 打勾圓圈)
+      const supContainer = document.getElementById("suppliesContainer");
+      const visibleSupplies = (data.supplies || []).filter(item => item.visible !== false);
+      
+      if (visibleSupplies.length === 0) {
+        supContainer.innerHTML = `<div class="p-6 text-center text-slate-400 font-bold text-lg">無特殊必備用品</div>`;
+      } else {
+        supContainer.innerHTML = visibleSupplies.map((item) => `
+          <div class="flex items-center gap-3.5 p-3.5 rounded-2xl bg-amber-50/60 border border-amber-200/70 shadow-xs">
+            <div class="w-7 h-7 rounded-full border-2 border-amber-500 flex items-center justify-center text-amber-600 font-black text-sm flex-shrink-0">
+              ✓
+            </div>
+            <span class="item-text font-bold text-slate-800 tracking-wide flex-1">
+              ${renderZhuyinHtml(item.content)}
+            </span>
+          </div>
+        `).join('');
+      }
+
+      // 生活提醒與交代事項 (淡綠底 + ⓘ 圓圈)
+      const notContainer = document.getElementById("noticesContainer");
+      const visibleNotices = (data.notices || []).filter(item => item.visible !== false);
+      
+      if (visibleNotices.length === 0) {
+        notContainer.innerHTML = `<div class="p-6 text-center text-slate-400 font-bold text-lg">暫無宣導事項</div>`;
+      } else {
+        notContainer.innerHTML = visibleNotices.map((item) => `
+          <div class="flex items-center gap-3.5 p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 shadow-xs">
+            <div class="w-7 h-7 rounded-full border-2 border-emerald-500 flex items-center justify-center text-emerald-600 font-black text-base flex-shrink-0">
+              ⓘ
+            </div>
+            <span class="item-text font-bold text-slate-700 tracking-wide flex-1">
+              ${renderZhuyinHtml(item.content)}
+            </span>
+          </div>
+        `).join('');
+      }
+    }
+
+    function toggleZhuyin() {
+      window.appState.zhuyinEnabled = !window.appState.zhuyinEnabled;
+      const statusText = document.getElementById("zhuyinStatusText");
+      if (window.appState.zhuyinEnabled) {
+        document.body.classList.remove("no-zhuyin");
+        statusText.innerText = "注音：開";
+      } else {
+        document.body.classList.add("no-zhuyin");
+        statusText.innerText = "注音：關";
+      }
+      renderAll();
+    }
+
+    function cycleTextScale() {
+      const scales = ['lg', 'xl', '2xl'];
+      const labels = { lg: '大', xl: '特大', '2xl': '超大' };
+      let currIdx = scales.indexOf(window.appState.scale);
+      currIdx = (currIdx + 1) % scales.length;
+      window.appState.scale = scales[currIdx];
+
+      document.body.classList.remove('tv-scale-lg', 'tv-scale-xl', 'tv-scale-2xl');
+      document.body.classList.add(`tv-scale-${window.appState.scale}`);
+      document.getElementById("scaleLabel").innerText = labels[window.appState.scale];
+    }
+
+    function toggleTheme() {
+      if (window.appState.theme === 'light') {
+        window.appState.theme = 'chalkboard';
+        document.body.classList.add('theme-chalkboard');
+      } else {
+        window.appState.theme = 'light';
+        document.body.classList.remove('theme-chalkboard');
+      }
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    // 月曆彈窗控制 (六日紅字)
+    function toggleCalendarModal() {
+      const modal = document.getElementById("calendarModal");
+      modal.classList.toggle("hidden");
+      if (!modal.classList.contains("hidden")) {
+        renderCalendarGrid();
+      }
+    }
+
+    function renderCalendarGrid() {
+      const y = window.appState.calendarYear;
+      const m = window.appState.calendarMonth;
+
+      const ySelect = document.getElementById("calYearSelect");
+      ySelect.innerHTML = "";
+      for (let yr = y - 2; yr <= y + 2; yr++) {
+        const opt = document.createElement("option");
+        opt.value = yr;
+        opt.innerText = `${yr} 年`;
+        if (yr === y) opt.selected = true;
+        ySelect.appendChild(opt);
+      }
+
+      const mSelect = document.getElementById("calMonthSelect");
+      mSelect.innerHTML = "";
+      for (let mo = 0; mo < 12; mo++) {
+        const opt = document.createElement("option");
+        opt.value = mo;
+        opt.innerText = `${mo + 1} 月`;
+        if (mo === m) opt.selected = true;
+        mSelect.appendChild(opt);
+      }
+
+      const firstDayIndex = new Date(y, m, 1).getDay();
+      const totalDays = new Date(y, m + 1, 0).getDate();
+      const grid = document.getElementById("calendarDaysGrid");
+      grid.innerHTML = "";
+
+      for (let i = 0; i < firstDayIndex; i++) {
+        const blank = document.createElement("div");
+        grid.appendChild(blank);
+      }
+
+      const todayStr = getTodayString();
+      const currentSelectedStr = window.appState.currentDate;
+
+      for (let d = 1; d <= totalDays; d++) {
+        const dateStr = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        const dayOfWeek = (firstDayIndex + d - 1) % 7;
+        const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+
+        const btn = document.createElement("button");
+        btn.className = `h-9 rounded-xl flex items-center justify-center font-bold text-sm transition ${
+          isWeekend ? "text-red-500 hover:bg-red-50" : "text-slate-700 hover:bg-blue-50"
+        }`;
+
+        if (dateStr === currentSelectedStr) {
+          btn.classList.add("bg-blue-600", "text-white");
+          btn.classList.remove("text-red-500", "text-slate-700");
+        } else if (dateStr === todayStr) {
+          btn.classList.add("border-2", "border-amber-400");
+        }
+
+        btn.innerText = d;
+        btn.onclick = () => {
+          selectDate(dateStr);
+          document.getElementById("calendarModal").classList.add("hidden");
+        };
+
+        grid.appendChild(btn);
+      }
+    }
+
+    function changeCalMonth(delta) {
+      window.appState.calendarMonth += delta;
+      if (window.appState.calendarMonth > 11) {
+        window.appState.calendarMonth = 0;
+        window.appState.calendarYear++;
+      } else if (window.appState.calendarMonth < 0) {
+        window.appState.calendarMonth = 11;
+        window.appState.calendarYear--;
+      }
+      renderCalendarGrid();
+    }
+
+    function onYearMonthChange() {
+      window.appState.calendarYear = parseInt(document.getElementById("calYearSelect").value);
+      window.appState.calendarMonth = parseInt(document.getElementById("calMonthSelect").value);
+      renderCalendarGrid();
+    }
+
+    function selectDate(dateStr) {
+      window.appState.currentDate = dateStr;
+      if (window.listenToDateRecord) {
+        window.listenToDateRecord(dateStr);
+      } else {
+        renderAll();
+      }
+    }
+
+    function openTeacherAuthModal() {
+      document.getElementById("authPwdInput").value = "";
+      document.getElementById("authErrorMsg").classList.add("hidden");
+      document.getElementById("authModal").classList.remove("hidden");
+      document.getElementById("authPwdInput").focus();
+    }
+
+    function closeTeacherAuthModal() {
+      document.getElementById("authModal").classList.add("hidden");
+    }
+
+    function verifyTeacherPwd() {
+      const pwd = document.getElementById("authPwdInput").value;
+      if (pwd === "Rccbok6869") {
+        closeTeacherAuthModal();
+        openEditorModal();
+      } else {
+        document.getElementById("authErrorMsg").classList.remove("hidden");
+        document.getElementById("authPwdInput").value = "";
+        document.getElementById("authPwdInput").focus();
+      }
+    }
+
+    function openEditorModal() {
+      const data = getCurrentData();
+      document.getElementById("editorDateBadge").innerText = window.appState.currentDate;
+      document.getElementById("editDuties").value = data.duties || "";
+      document.getElementById("editLifeGoal").value = data.lifeGoal || "";
+      document.getElementById("editNoticeBanner").value = data.noticeBanner || "";
+
+      renderEditLists(data);
+      document.getElementById("editorModal").classList.remove("hidden");
+    }
+
+    function closeEditorModal() {
+      document.getElementById("editorModal").classList.add("hidden");
+    }
+
+    function renderEditLists(data) {
+      // 作業清單 (包含顯示開關)
+      const hwDiv = document.getElementById("editHomeworkList");
+      hwDiv.innerHTML = (data.homework || []).map((item, idx) => `
+        <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-2xl border border-slate-200">
+          <label class="flex items-center gap-1.5 text-xs font-bold text-slate-600 flex-shrink-0 cursor-pointer">
+            <input type="checkbox" id="hw_vis_${idx}" ${item.visible !== false ? 'checked' : ''} class="w-4 h-4 rounded text-blue-600" />
+            顯示
+          </label>
+          <select id="hw_sub_${idx}" class="p-2 border rounded-xl bg-white font-bold text-sm">
+            <option value="國語" ${item.subject === '國語' ? 'selected' : ''}>國語</option>
+            <option value="數學" ${item.subject === '數學' ? 'selected' : ''}>數學</option>
+            <option value="英語" ${item.subject === '英語' ? 'selected' : ''}>英語</option>
+            <option value="社會" ${item.subject === '社會' ? 'selected' : ''}>社會</option>
+            <option value="自然" ${item.subject === '自然' ? 'selected' : ''}>自然</option>
+            <option value="藝術" ${item.subject === '藝術' ? 'selected' : ''}>藝術</option>
+            <option value="生活" ${item.subject === '生活' ? 'selected' : ''}>生活</option>
+            <option value="閱讀" ${item.subject === '閱讀' ? 'selected' : ''}>閱讀</option>
+            <option value="其他" ${item.subject === '其他' ? 'selected' : ''}>其他</option>
+          </select>
+          <input type="text" id="hw_txt_${idx}" value="${item.content || ''}" class="flex-1 px-3 py-1.5 border rounded-xl bg-white" placeholder="輸入作業內容..." />
+          <button onclick="removeEditItem('homework', ${idx})" class="p-2 text-rose-500 hover:text-rose-700 font-bold text-lg">🗑️</button>
+        </div>
+      `).join('');
+
+      // 用品清單 (包含顯示開關)
+      const supDiv = document.getElementById("editSuppliesList");
+      supDiv.innerHTML = (data.supplies || []).map((item, idx) => `
+        <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-2xl border border-slate-200">
+          <label class="flex items-center gap-1.5 text-xs font-bold text-slate-600 flex-shrink-0 cursor-pointer">
+            <input type="checkbox" id="sup_vis_${idx}" ${item.visible !== false ? 'checked' : ''} class="w-4 h-4 rounded text-blue-600" />
+            顯示
+          </label>
+          <input type="text" id="sup_txt_${idx}" value="${item.content || ''}" class="flex-1 px-3 py-1.5 border rounded-xl bg-white" placeholder="輸入必備用品..." />
+          <button onclick="removeEditItem('supplies', ${idx})" class="p-2 text-rose-500 hover:text-rose-700 font-bold text-lg">🗑️</button>
+        </div>
+      `).join('');
+
+      // 叮嚀清單 (包含顯示開關)
+      const notDiv = document.getElementById("editNoticesList");
+      notDiv.innerHTML = (data.notices || []).map((item, idx) => `
+        <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-2xl border border-slate-200">
+          <label class="flex items-center gap-1.5 text-xs font-bold text-slate-600 flex-shrink-0 cursor-pointer">
+            <input type="checkbox" id="not_vis_${idx}" ${item.visible !== false ? 'checked' : ''} class="w-4 h-4 rounded text-blue-600" />
+            顯示
+          </label>
+          <input type="text" id="not_txt_${idx}" value="${item.content || ''}" class="flex-1 px-3 py-1.5 border rounded-xl bg-white" placeholder="輸入生活叮嚀事項..." />
+          <button onclick="removeEditItem('notices', ${idx})" class="p-2 text-rose-500 hover:text-rose-700 font-bold text-lg">🗑️</button>
+        </div>
+      `).join('');
+    }
+
+    function addEditItem(type) {
+      const data = getCurrentData();
+      if (type === 'homework') {
+        data.homework.push({ id: 'h_' + Date.now(), subject: '國語', content: '', visible: true });
+      } else if (type === 'supplies') {
+        data.supplies.push({ id: 's_' + Date.now(), content: '', visible: true });
+      } else if (type === 'notices') {
+        data.notices.push({ id: 'n_' + Date.now(), content: '', visible: true });
+      }
+      renderEditLists(data);
+    }
+
+    function removeEditItem(type, idx) {
+      const data = getCurrentData();
+      if (type === 'homework') data.homework.splice(idx, 1);
+      if (type === 'supplies') data.supplies.splice(idx, 1);
+      if (type === 'notices') data.notices.splice(idx, 1);
+      renderEditLists(data);
+    }
+
+    async function saveEditorData() {
+      const data = getCurrentData();
+      data.duties = document.getElementById("editDuties").value.trim();
+      data.lifeGoal = document.getElementById("editLifeGoal").value.trim();
+      data.noticeBanner = document.getElementById("editNoticeBanner").value.trim();
+
+      const hwCount = (data.homework || []).length;
+      for (let i = 0; i < hwCount; i++) {
+        const sub = document.getElementById(`hw_sub_${i}`)?.value;
+        const txt = document.getElementById(`hw_txt_${i}`)?.value;
+        const vis = document.getElementById(`hw_vis_${i}`)?.checked;
+        if (data.homework[i]) {
+          data.homework[i].subject = sub;
+          data.homework[i].content = txt;
+          data.homework[i].visible = vis;
+        }
+      }
+
+      const supCount = (data.supplies || []).length;
+      for (let i = 0; i < supCount; i++) {
+        const txt = document.getElementById(`sup_txt_${i}`)?.value;
+        const vis = document.getElementById(`sup_vis_${i}`)?.checked;
+        if (data.supplies[i]) {
+          data.supplies[i].content = txt;
+          data.supplies[i].visible = vis;
+        }
+      }
+
+      const notCount = (data.notices || []).length;
+      for (let i = 0; i < notCount; i++) {
+        const txt = document.getElementById(`not_txt_${i}`)?.value;
+        const vis = document.getElementById(`not_vis_${i}`)?.checked;
+        if (data.notices[i]) {
+          data.notices[i].content = txt;
+          data.notices[i].visible = vis;
+        }
+      }
+
+      closeEditorModal();
+      renderAll();
+
+      if (window.saveCurrentDateToFirebase) {
+        await window.saveCurrentDateToFirebase(window.appState.currentDate, data);
+      }
+    }
+
+    // 點擊月曆外部自動關閉
+    document.addEventListener("click", (e) => {
+      const calModal = document.getElementById("calendarModal");
+      const calToggle = document.getElementById("calendarToggleBtn");
+      if (calModal && calToggle && !calModal.contains(e.target) && !calToggle.contains(e.target)) {
+        calModal.classList.add("hidden");
+      }
+    });
+
+    // 初始渲染
+    renderAll();
+  </script>
+</body>
+</html>
