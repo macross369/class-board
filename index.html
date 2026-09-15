@@ -70,6 +70,13 @@
     .tv-scale-xl .card-title { font-size: 1.75rem; }
     .tv-scale-2xl .card-title { font-size: 2.1rem; }
 
+    /* 自動分行與防超出容器設定 */
+    .hw-item-text, .side-item-text {
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      min-width: 0;
+    }
+
     /* 注音拼音排版樣式 */
     ruby {
       ruby-align: center;
@@ -631,14 +638,14 @@
         hwContainer.innerHTML = `<div class="p-8 text-center text-slate-400 font-bold text-xl">今日尚無指派作業 🎉</div>`;
       } else {
         hwContainer.innerHTML = visibleHomework.map((item, idx) => `
-          <div class="flex items-center gap-3.5 p-3.5 md:p-4 rounded-2xl bg-slate-100/70 border border-slate-200/80 shadow-xs">
+          <div class="flex items-center gap-3.5 p-3.5 md:p-4 rounded-2xl bg-slate-100/70 border border-slate-200/80 shadow-xs w-full">
             <span class="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-200 text-slate-700 font-black text-base flex-shrink-0">
               ${idx + 1}
             </span>
             <span class="px-3 py-1 rounded-xl text-base font-black ${getSubjectTagClass(item.subject)} flex-shrink-0 tracking-wide">
               ${renderZhuyinHtml(item.subject)}
             </span>
-            <span class="hw-item-text font-bold text-slate-800 tracking-wide flex-1 break-words">
+            <span class="hw-item-text font-bold text-slate-800 tracking-wide flex-1 min-w-0">
               ${renderZhuyinHtml(item.content)}
             </span>
           </div>
@@ -653,11 +660,11 @@
         supContainer.innerHTML = `<div class="p-6 text-center text-slate-400 font-bold text-lg">無特殊必備用品</div>`;
       } else {
         supContainer.innerHTML = visibleSupplies.map((item) => `
-          <div class="flex items-start gap-3.5 p-3.5 md:p-4 rounded-2xl bg-amber-50/70 border border-amber-200/80 shadow-xs">
+          <div class="flex items-start gap-3.5 p-3.5 md:p-4 rounded-2xl bg-amber-50/70 border border-amber-200/80 shadow-xs w-full">
             <div class="w-7 h-7 rounded-full border-2 border-amber-500 flex items-center justify-center text-amber-600 font-black text-sm flex-shrink-0 mt-0.5 md:mt-1">
               ✓
             </div>
-            <span class="side-item-text font-bold text-slate-800 tracking-wide flex-1 leading-relaxed break-words">
+            <span class="side-item-text font-bold text-slate-800 tracking-wide flex-1 min-w-0 leading-relaxed">
               ${renderZhuyinHtml(item.content)}
             </span>
           </div>
@@ -672,11 +679,11 @@
         notContainer.innerHTML = `<div class="p-6 text-center text-slate-400 font-bold text-lg">暫無宣導事項</div>`;
       } else {
         notContainer.innerHTML = visibleNotices.map((item) => `
-          <div class="flex items-start gap-3.5 p-3.5 md:p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 shadow-xs">
+          <div class="flex items-start gap-3.5 p-3.5 md:p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 shadow-xs w-full">
             <div class="w-7 h-7 rounded-full border-2 border-emerald-500 flex items-center justify-center text-emerald-600 font-black text-base flex-shrink-0 mt-0.5 md:mt-0.5">
               ⓘ
             </div>
-            <span class="side-item-text font-bold text-slate-800 tracking-wide flex-1 leading-relaxed break-words">
+            <span class="side-item-text font-bold text-slate-800 tracking-wide flex-1 min-w-0 leading-relaxed">
               ${renderZhuyinHtml(item.content)}
             </span>
           </div>
