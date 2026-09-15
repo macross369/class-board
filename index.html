@@ -6,10 +6,10 @@
   <title>三年一班 智慧大電視聯絡簿</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Fonts: 芫荽 (Iansui) 注音字體與 Noto Sans TC -->
+  <!-- Google Fonts: Noto Sans TC, Noto Serif TC 與 圓體 -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Iansui&family=JetBrains+Mono:wght@700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
 
   <style>
     :root {
@@ -18,6 +18,21 @@
       --border-soft: #edf0f5;
       --text-main: #1e293b;
       --text-muted: #64748b;
+    }
+
+    /* 預設黑體：貼合截圖之微軟正黑體 / 蘋方 / Noto Sans TC */
+    body.font-sans-mode {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", "Noto Sans TC", system-ui, sans-serif;
+    }
+
+    /* 標楷體模式（適合低年級國字筆畫教學） */
+    body.font-kai-mode {
+      font-family: "DFKai-SB", "BiauKai", "標楷體", "Kaiti TC", "Noto Serif TC", serif;
+    }
+
+    /* 圓體模式（圓潤活潑） */
+    body.font-round-mode {
+      font-family: "Yuanti SC", "Microsoft YaHei", "Noto Sans TC", sans-serif;
     }
 
     body.theme-chalkboard {
@@ -31,25 +46,25 @@
     body {
       background-color: var(--bg-page);
       color: var(--text-main);
-      font-family: 'Noto Sans TC', 'Iansui', sans-serif;
       transition: background-color 0.25s ease, color 0.25s ease;
+      letter-spacing: -0.01em;
     }
 
     .font-clock {
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'JetBrains Mono', -apple-system, BlinkMacSystemFont, monospace;
     }
 
-    /* 大電視專用字體尺寸階梯 */
+    /* 大電視專用字體尺寸階梯 (比照截圖比例) */
     .tv-scale-lg { font-size: 1.05rem; }
-    .tv-scale-lg .item-text { font-size: 1.45rem; line-height: 2.2rem; }
-    .tv-scale-lg .card-title { font-size: 1.65rem; }
+    .tv-scale-lg .item-text { font-size: 1.45rem; line-height: 2.1rem; }
+    .tv-scale-lg .card-title { font-size: 1.6rem; }
 
     .tv-scale-xl { font-size: 1.25rem; }
-    .tv-scale-xl .item-text { font-size: 1.85rem; line-height: 2.7rem; }
+    .tv-scale-xl .item-text { font-size: 1.85rem; line-height: 2.6rem; }
     .tv-scale-xl .card-title { font-size: 1.95rem; }
 
     .tv-scale-2xl { font-size: 1.45rem; }
-    .tv-scale-2xl .item-text { font-size: 2.25rem; line-height: 3.2rem; }
+    .tv-scale-2xl .item-text { font-size: 2.3rem; line-height: 3.2rem; }
     .tv-scale-2xl .card-title { font-size: 2.35rem; }
 
     /* 注音拼音標註排版 */
@@ -63,26 +78,26 @@
       color: currentColor;
       opacity: 0.88;
       user-select: none;
-      font-family: 'Iansui', 'Noto Sans TC', sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Microsoft JhengHei", sans-serif;
     }
     body.no-zhuyin rt {
       display: none !important;
     }
 
-    /* 科目色彩標籤 */
-    .subject-tag-chinese { background-color: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
-    .subject-tag-math { background-color: #dbeafe; color: #2563eb; border: 1px solid #93c5fd; }
+    /* 比照截圖之科目彩色標籤 */
+    .subject-tag-chinese { background-color: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
+    .subject-tag-math { background-color: #dbeafe; color: #2563eb; border: 1px solid #bfdbfe; }
     .subject-tag-english { background-color: #ccfbf1; color: #0d9488; border: 1px solid #99f6e4; }
-    .subject-tag-science { background-color: #dcfce7; color: #16a34a; border: 1px solid #86efac; }
-    .subject-tag-social { background-color: #ffedd5; color: #ea580c; border: 1px solid #fdba74; }
-    .subject-tag-art { background-color: #f3e8ff; color: #9333ea; border: 1px solid #d8b4fe; }
-    .subject-tag-life { background-color: #ecfdf5; color: #059669; border: 1px solid #6ee7b7; }
+    .subject-tag-science { background-color: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; }
+    .subject-tag-social { background-color: #ffedd5; color: #ea580c; border: 1px solid #fed7aa; }
+    .subject-tag-art { background-color: #f3e8ff; color: #9333ea; border: 1px solid #e9d5ff; }
+    .subject-tag-life { background-color: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
     .subject-tag-read { background-color: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
     .subject-tag-default { background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
   </style>
 </head>
 
-<body class="tv-scale-xl no-zhuyin min-h-screen flex flex-col p-4 md:p-6 select-none">
+<body class="font-sans-mode tv-scale-xl no-zhuyin min-h-screen flex flex-col p-4 md:p-6 select-none">
   <script>
     const DEFAULT_BOARD_DATA = {
       duties: "5號、6號",
@@ -113,6 +128,7 @@
     window.appState = {
       theme: 'light',
       scale: 'xl',
+      fontMode: 'sans', // 'sans' (截圖黑體), 'kai' (標楷體), 'round' (圓體)
       zhuyinEnabled: false,
       currentDate: getTodayString(),
       records: {
@@ -123,7 +139,7 @@
     };
   </script>
 
-  <!-- 頂部資訊列 -->
+  <!-- 頂部資訊列 (比照截圖佈局) -->
   <header class="bg-white rounded-3xl shadow-sm border p-4 md:p-5 mb-4 flex flex-wrap items-center justify-between gap-4" style="border-color: var(--border-soft);">
     <!-- 班級標題與日期月曆 -->
     <div class="flex flex-col gap-2">
@@ -189,10 +205,16 @@
         <span id="zhuyinStatusText">注音：關</span>
       </button>
 
+      <!-- 字型切換按鈕 (黑體 / 標楷體 / 圓體) -->
+      <button onclick="cycleFontFamily()" class="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-base transition shadow-sm" title="切換字型">
+        <span>🔤</span>
+        <span>字體：<span id="fontTypeLabel">黑體</span></span>
+      </button>
+
       <!-- 字體縮放按鈕 -->
       <button onclick="cycleTextScale()" class="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-base transition shadow-sm">
         <span>🔍</span>
-        <span>字體：<span id="scaleLabel">特大</span></span>
+        <span>大小：<span id="scaleLabel">特大</span></span>
       </button>
 
       <!-- 深色黑板切換 -->
@@ -213,7 +235,7 @@
     </div>
   </header>
 
-  <!-- 復原：今日重大提醒紅色橫幅欄位 (完全比照截圖) -->
+  <!-- 今日重大提醒紅色橫幅欄位 (完全比照截圖) -->
   <section id="noticeBannerSection" class="mb-5 rounded-3xl p-3 md:p-3.5 bg-gradient-to-r from-red-600 via-rose-600 to-red-600 text-white shadow-md flex items-center gap-3.5 min-h-[60px]">
     <div class="flex-shrink-0 px-4 py-2 rounded-2xl bg-white/20 backdrop-blur-sm font-black text-base md:text-lg tracking-wider flex items-center gap-2 border border-white/30 shadow-inner">
       <span>📢</span> 今日重大提醒
@@ -323,7 +345,7 @@
       </div>
 
       <div class="p-5 md:p-6 overflow-y-auto space-y-6 flex-1 text-base">
-        <!-- 復原：今日重大提醒編輯欄位 -->
+        <!-- 今日重大提醒編輯欄位 -->
         <div>
           <label class="block font-bold mb-1 text-rose-600 flex items-center gap-1.5">
             <span>📢 今日重大提醒</span>
@@ -562,7 +584,7 @@
     }
     startDigitalClock();
 
-    // 渲染整個大電視畫面
+    // 渲染整個大電視畫面 (字型與版面嚴格貼合截圖)
     function renderAll() {
       const data = getCurrentData();
 
@@ -575,13 +597,13 @@
       document.getElementById("dutiesDisplay").innerText = data.duties || "5號、6號";
       document.getElementById("lifeGoalDisplay").innerText = data.lifeGoal || "載入中...";
 
-      // 復原：今日重大提醒紅色橫幅文字
+      // 今日重大提醒紅色橫幅文字
       const bannerTextEl = document.getElementById("noticeBannerText");
       if (bannerTextEl) {
         bannerTextEl.innerText = data.noticeBanner || "";
       }
 
-      // 今日作業清單
+      // 今日作業清單 (比照截圖樣式：圓角淺灰底框 + 數字方圓框 + 鮮明標籤 + 粗體字)
       const hwContainer = document.getElementById("homeworkContainer");
       const visibleHomework = (data.homework || []).filter(item => item.visible !== false);
       document.getElementById("hwCountBadge").innerText = `共 ${visibleHomework.length} 項`;
@@ -590,11 +612,11 @@
         hwContainer.innerHTML = `<div class="p-8 text-center text-slate-400 font-bold text-xl">今日尚無指派作業 🎉</div>`;
       } else {
         hwContainer.innerHTML = visibleHomework.map((item, idx) => `
-          <div class="flex items-center gap-3.5 p-3.5 rounded-2xl bg-slate-100/70 border border-slate-200/80 shadow-xs">
-            <span class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-300/80 text-slate-700 font-black text-base flex-shrink-0">
+          <div class="flex items-center gap-3.5 p-3.5 md:p-4 rounded-2xl bg-slate-100/70 border border-slate-200/80 shadow-xs">
+            <span class="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-200 text-slate-700 font-black text-base flex-shrink-0">
               ${idx + 1}
             </span>
-            <span class="px-3 py-1 rounded-xl text-base font-black ${getSubjectTagClass(item.subject)} flex-shrink-0">
+            <span class="px-3 py-1 rounded-xl text-base font-black ${getSubjectTagClass(item.subject)} flex-shrink-0 tracking-wide">
               ${renderZhuyinHtml(item.subject)}
             </span>
             <span class="item-text font-bold text-slate-800 tracking-wide flex-1">
@@ -612,7 +634,7 @@
         supContainer.innerHTML = `<div class="p-6 text-center text-slate-400 font-bold text-lg">無特殊必備用品</div>`;
       } else {
         supContainer.innerHTML = visibleSupplies.map((item) => `
-          <div class="flex items-center gap-3.5 p-3.5 rounded-2xl bg-amber-50/60 border border-amber-200/70 shadow-xs">
+          <div class="flex items-center gap-3.5 p-3.5 md:p-4 rounded-2xl bg-amber-50/70 border border-amber-200/80 shadow-xs">
             <div class="w-7 h-7 rounded-full border-2 border-amber-500 flex items-center justify-center text-amber-600 font-black text-sm flex-shrink-0">
               ✓
             </div>
@@ -631,16 +653,29 @@
         notContainer.innerHTML = `<div class="p-6 text-center text-slate-400 font-bold text-lg">暫無宣導事項</div>`;
       } else {
         notContainer.innerHTML = visibleNotices.map((item) => `
-          <div class="flex items-center gap-3.5 p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 shadow-xs">
+          <div class="flex items-center gap-3.5 p-3.5 md:p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 shadow-xs">
             <div class="w-7 h-7 rounded-full border-2 border-emerald-500 flex items-center justify-center text-emerald-600 font-black text-base flex-shrink-0">
               ⓘ
             </div>
-            <span class="item-text font-bold text-slate-700 tracking-wide flex-1">
+            <span class="item-text font-bold text-slate-800 tracking-wide flex-1">
               ${renderZhuyinHtml(item.content)}
             </span>
           </div>
         `).join('');
       }
+    }
+
+    // 字型切換：黑體 (截圖) -> 標楷體 -> 圓體
+    function cycleFontFamily() {
+      const fonts = ['sans', 'kai', 'round'];
+      const labels = { sans: '黑體', kai: '標楷體', round: '圓體' };
+      let currIdx = fonts.indexOf(window.appState.fontMode || 'sans');
+      currIdx = (currIdx + 1) % fonts.length;
+      window.appState.fontMode = fonts[currIdx];
+
+      document.body.classList.remove('font-sans-mode', 'font-kai-mode', 'font-round-mode');
+      document.body.classList.add(`font-${window.appState.fontMode}-mode`);
+      document.getElementById("fontTypeLabel").innerText = labels[window.appState.fontMode];
     }
 
     function toggleZhuyin() {
@@ -844,7 +879,7 @@
             <option value="閱讀" ${item.subject === '閱讀' ? 'selected' : ''}>閱讀</option>
             <option value="其他" ${item.subject === '其他' ? 'selected' : ''}>其他</option>
           </select>
-          <input type="text" id="hw_txt_${idx}" value="${item.content || ''}" class="flex-1 px-3 py-1.5 border rounded-xl bg-white" placeholder="輸入作業內容..." />
+          <input type="text" id="hw_txt_${idx}" value="${item.content || ''}" class="flex-1 px-3 py-1.5 border rounded-xl bg-white font-bold" placeholder="輸入作業內容..." />
           <button onclick="removeEditItem('homework', ${idx})" class="p-2 text-rose-500 hover:text-rose-700 font-bold text-lg">🗑️</button>
         </div>
       `).join('');
@@ -857,7 +892,7 @@
             <input type="checkbox" id="sup_vis_${idx}" ${item.visible !== false ? 'checked' : ''} class="w-4 h-4 rounded text-blue-600" />
             顯示
           </label>
-          <input type="text" id="sup_txt_${idx}" value="${item.content || ''}" class="flex-1 px-3 py-1.5 border rounded-xl bg-white" placeholder="輸入必備用品..." />
+          <input type="text" id="sup_txt_${idx}" value="${item.content || ''}" class="flex-1 px-3 py-1.5 border rounded-xl bg-white font-bold" placeholder="輸入必備用品..." />
           <button onclick="removeEditItem('supplies', ${idx})" class="p-2 text-rose-500 hover:text-rose-700 font-bold text-lg">🗑️</button>
         </div>
       `).join('');
@@ -870,7 +905,7 @@
             <input type="checkbox" id="not_vis_${idx}" ${item.visible !== false ? 'checked' : ''} class="w-4 h-4 rounded text-blue-600" />
             顯示
           </label>
-          <input type="text" id="not_txt_${idx}" value="${item.content || ''}" class="flex-1 px-3 py-1.5 border rounded-xl bg-white" placeholder="輸入生活叮嚀事項..." />
+          <input type="text" id="not_txt_${idx}" value="${item.content || ''}" class="flex-1 px-3 py-1.5 border rounded-xl bg-white font-bold" placeholder="輸入生活叮嚀事項..." />
           <button onclick="removeEditItem('notices', ${idx})" class="p-2 text-rose-500 hover:text-rose-700 font-bold text-lg">🗑️</button>
         </div>
       `).join('');
