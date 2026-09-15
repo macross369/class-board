@@ -6,7 +6,7 @@
   <title>三年一班 智慧大電視聯絡簿</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Fonts: Noto Sans TC, Noto Serif TC 與 圓體 -->
+  <!-- Google Fonts: Noto Sans TC, Noto Serif TC -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -20,7 +20,7 @@
       --text-muted: #64748b;
     }
 
-    /* 預設黑體：貼合截圖之微軟正黑體 / 蘋方 / Noto Sans TC */
+    /* 預設黑體：貼合微軟正黑體 / 蘋方 / Noto Sans TC */
     body.font-sans-mode {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", "Noto Sans TC", system-ui, sans-serif;
     }
@@ -54,18 +54,20 @@
       font-family: 'JetBrains Mono', -apple-system, BlinkMacSystemFont, monospace;
     }
 
-    /* 大電視專用字體尺寸階梯 (比照截圖比例) */
-    .tv-scale-lg { font-size: 1.05rem; }
-    .tv-scale-lg .item-text { font-size: 1.45rem; line-height: 2.1rem; }
-    .tv-scale-lg .card-title { font-size: 1.6rem; }
+    /* 大電視字體尺寸控制 */
+    /* 左側作業文字尺寸 */
+    .tv-scale-lg .hw-item-text { font-size: 1.35rem; line-height: 2rem; }
+    .tv-scale-xl .hw-item-text { font-size: 1.75rem; line-height: 2.5rem; }
+    .tv-scale-2xl .hw-item-text { font-size: 2.15rem; line-height: 3rem; }
 
-    .tv-scale-xl { font-size: 1.25rem; }
-    .tv-scale-xl .item-text { font-size: 1.85rem; line-height: 2.6rem; }
-    .tv-scale-xl .card-title { font-size: 1.95rem; }
+    /* 右側必備用具與提醒事項專屬尺寸（優化寬度比例與單行容納度，防止尷尬折行） */
+    .tv-scale-lg .side-item-text { font-size: 1.18rem; line-height: 1.75rem; }
+    .tv-scale-xl .side-item-text { font-size: 1.45rem; line-height: 2.15rem; }
+    .tv-scale-2xl .side-item-text { font-size: 1.8rem; line-height: 2.55rem; }
 
-    .tv-scale-2xl { font-size: 1.45rem; }
-    .tv-scale-2xl .item-text { font-size: 2.3rem; line-height: 3.2rem; }
-    .tv-scale-2xl .card-title { font-size: 2.35rem; }
+    .tv-scale-lg .card-title { font-size: 1.45rem; }
+    .tv-scale-xl .card-title { font-size: 1.75rem; }
+    .tv-scale-2xl .card-title { font-size: 2.1rem; }
 
     /* 注音拼音標註排版 */
     ruby {
@@ -84,7 +86,7 @@
       display: none !important;
     }
 
-    /* 比照截圖之科目彩色標籤 */
+    /* 科目彩色標籤 */
     .subject-tag-chinese { background-color: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
     .subject-tag-math { background-color: #dbeafe; color: #2563eb; border: 1px solid #bfdbfe; }
     .subject-tag-english { background-color: #ccfbf1; color: #0d9488; border: 1px solid #99f6e4; }
@@ -101,7 +103,7 @@
   <script>
     const DEFAULT_BOARD_DATA = {
       duties: "5號、6號",
-      lifeGoal: "載入中...",
+      lifeGoal: "保持微笑，友愛同學，自主學習",
       noticeBanner: "",
       homework: [
         { id: "h1", subject: "國語", content: "國語習作第 42 至 45 頁並確實訂正", visible: true },
@@ -128,7 +130,7 @@
     window.appState = {
       theme: 'light',
       scale: 'xl',
-      fontMode: 'sans', // 'sans' (截圖黑體), 'kai' (標楷體), 'round' (圓體)
+      fontMode: 'sans',
       zhuyinEnabled: false,
       currentDate: getTodayString(),
       records: {
@@ -139,7 +141,7 @@
     };
   </script>
 
-  <!-- 頂部資訊列 (比照截圖佈局) -->
+  <!-- 頂部資訊列 -->
   <header class="bg-white rounded-3xl shadow-sm border p-4 md:p-5 mb-4 flex flex-wrap items-center justify-between gap-4" style="border-color: var(--border-soft);">
     <!-- 班級標題與日期月曆 -->
     <div class="flex flex-col gap-2">
@@ -235,7 +237,7 @@
     </div>
   </header>
 
-  <!-- 今日重大提醒紅色橫幅欄位 (完全比照截圖) -->
+  <!-- 今日重大提醒紅色橫幅欄位 -->
   <section id="noticeBannerSection" class="mb-5 rounded-3xl p-3 md:p-3.5 bg-gradient-to-r from-red-600 via-rose-600 to-red-600 text-white shadow-md flex items-center gap-3.5 min-h-[60px]">
     <div class="flex-shrink-0 px-4 py-2 rounded-2xl bg-white/20 backdrop-blur-sm font-black text-base md:text-lg tracking-wider flex items-center gap-2 border border-white/30 shadow-inner">
       <span>📢</span> 今日重大提醒
@@ -243,9 +245,9 @@
     <div id="noticeBannerText" class="flex-1 font-black text-lg md:text-2xl tracking-wide truncate text-white/95"></div>
   </section>
 
-  <!-- 看板主體 -->
+  <!-- 看板主體 (左右欄位比例微調為 7:5 兼顧左右平衡與大電視顯示) -->
   <main class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-    <!-- 左側欄位：今日作業 + 下方雙卡片 (值日生座號 與 每日本週生活目標) -->
+    <!-- 左側欄位：今日作業 + 下方雙卡片 -->
     <div class="lg:col-span-7 flex flex-col gap-5">
       <!-- 今日作業主卡片 -->
       <section class="bg-white rounded-3xl p-6 border shadow-sm flex-1 flex flex-col" style="border-color: var(--border-soft);">
@@ -265,7 +267,7 @@
 
       <!-- 左側下方雙卡片：值日生座號 與 每日本週生活目標 -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <!-- 值日生座號卡片 (綠色人物圖示) -->
+        <!-- 值日生座號卡片 -->
         <div class="bg-white rounded-3xl p-4 border shadow-sm flex items-center gap-3.5" style="border-color: var(--border-soft);">
           <div class="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center text-2xl flex-shrink-0 shadow-sm">
             👤
@@ -276,14 +278,14 @@
           </div>
         </div>
 
-        <!-- 每日本週生活目標卡片 (紫色星芒圖示) -->
+        <!-- 每日本週生活目標卡片 -->
         <div class="bg-white rounded-3xl p-4 border shadow-sm flex items-center gap-3.5" style="border-color: var(--border-soft);">
           <div class="w-12 h-12 rounded-2xl bg-purple-600 text-white flex items-center justify-center text-2xl flex-shrink-0 shadow-sm">
             ✨
           </div>
           <div class="flex flex-col">
             <span class="text-xs font-bold text-slate-400">每日本週生活目標</span>
-            <span id="lifeGoalDisplay" class="text-xl md:text-2xl font-black text-slate-800">載入中...</span>
+            <span id="lifeGoalDisplay" class="text-xl md:text-2xl font-black text-slate-800">保持微笑，友愛同學，自主學習</span>
           </div>
         </div>
       </div>
@@ -291,7 +293,7 @@
 
     <!-- 右側欄位：明日必備用具 與 生活提醒與交代事項 -->
     <div class="lg:col-span-5 flex flex-col gap-5">
-      <!-- 明日必備用具 (橘黃打勾圓圈) -->
+      <!-- 明日必備用具 -->
       <section class="bg-white rounded-3xl p-6 border shadow-sm flex flex-col" style="border-color: var(--border-soft);">
         <div class="flex items-center gap-3 pb-3 mb-3 border-b border-slate-100">
           <span class="w-2.5 h-8 bg-amber-500 rounded-full inline-block"></span>
@@ -300,13 +302,13 @@
         <div id="suppliesContainer" class="flex-1 space-y-3"></div>
       </section>
 
-      <!-- 生活提醒與交代事項 (綠色 ⓘ 圓圈) -->
+      <!-- 生活提醒與交代事項 -->
       <section class="bg-white rounded-3xl p-6 border shadow-sm flex-1 flex flex-col" style="border-color: var(--border-soft);">
         <div class="flex items-center gap-3 pb-3 mb-3 border-b border-slate-100">
           <span class="w-2.5 h-8 bg-emerald-500 rounded-full inline-block"></span>
           <h2 class="card-title font-black text-slate-800 tracking-tight">生活提醒與交代事項</h2>
         </div>
-        <div id="noticesContainer" class="flex-1 space-y-2.5"></div>
+        <div id="noticesContainer" class="flex-1 space-y-3"></div>
       </section>
     </div>
   </main>
@@ -474,7 +476,6 @@
       onSnapshot 
     } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-    // 專屬 Firebase 金鑰配置 (my-class-tv)
     const firebaseConfig = {
       apiKey: "AIzaSyA31S3iEZqJbgOo2PGNH_YwsfKJ9jIcQh0",
       authDomain: "my-class-tv.firebaseapp.com",
@@ -584,7 +585,7 @@
     }
     startDigitalClock();
 
-    // 渲染整個大電視畫面 (字型與版面嚴格貼合截圖)
+    // 渲染整個大電視畫面
     function renderAll() {
       const data = getCurrentData();
 
@@ -595,7 +596,7 @@
       
       // 值日生 與 每日本週生活目標
       document.getElementById("dutiesDisplay").innerText = data.duties || "5號、6號";
-      document.getElementById("lifeGoalDisplay").innerText = data.lifeGoal || "載入中...";
+      document.getElementById("lifeGoalDisplay").innerText = data.lifeGoal || "保持微笑，友愛同學，自主學習";
 
       // 今日重大提醒紅色橫幅文字
       const bannerTextEl = document.getElementById("noticeBannerText");
@@ -603,7 +604,7 @@
         bannerTextEl.innerText = data.noticeBanner || "";
       }
 
-      // 今日作業清單 (比照截圖樣式：圓角淺灰底框 + 數字方圓框 + 鮮明標籤 + 粗體字)
+      // 今日作業清單
       const hwContainer = document.getElementById("homeworkContainer");
       const visibleHomework = (data.homework || []).filter(item => item.visible !== false);
       document.getElementById("hwCountBadge").innerText = `共 ${visibleHomework.length} 項`;
@@ -619,14 +620,14 @@
             <span class="px-3 py-1 rounded-xl text-base font-black ${getSubjectTagClass(item.subject)} flex-shrink-0 tracking-wide">
               ${renderZhuyinHtml(item.subject)}
             </span>
-            <span class="item-text font-bold text-slate-800 tracking-wide flex-1">
+            <span class="hw-item-text font-bold text-slate-800 tracking-wide flex-1 break-words">
               ${renderZhuyinHtml(item.content)}
             </span>
           </div>
         `).join('');
       }
 
-      // 明日必備用品 (淡橘底 + 打勾圓圈)
+      // 明日必備用品 (採用 items-start 搭配精準字級，讓圖示自然對齊第一行並防止突兀折行)
       const supContainer = document.getElementById("suppliesContainer");
       const visibleSupplies = (data.supplies || []).filter(item => item.visible !== false);
       
@@ -634,18 +635,18 @@
         supContainer.innerHTML = `<div class="p-6 text-center text-slate-400 font-bold text-lg">無特殊必備用品</div>`;
       } else {
         supContainer.innerHTML = visibleSupplies.map((item) => `
-          <div class="flex items-center gap-3.5 p-3.5 md:p-4 rounded-2xl bg-amber-50/70 border border-amber-200/80 shadow-xs">
-            <div class="w-7 h-7 rounded-full border-2 border-amber-500 flex items-center justify-center text-amber-600 font-black text-sm flex-shrink-0">
+          <div class="flex items-start gap-3.5 p-3.5 md:p-4 rounded-2xl bg-amber-50/70 border border-amber-200/80 shadow-xs">
+            <div class="w-7 h-7 rounded-full border-2 border-amber-500 flex items-center justify-center text-amber-600 font-black text-sm flex-shrink-0 mt-0.5 md:mt-1">
               ✓
             </div>
-            <span class="item-text font-bold text-slate-800 tracking-wide flex-1">
+            <span class="side-item-text font-bold text-slate-800 tracking-wide flex-1 leading-relaxed break-words">
               ${renderZhuyinHtml(item.content)}
             </span>
           </div>
         `).join('');
       }
 
-      // 生活提醒與交代事項 (淡綠底 + ⓘ 圓圈)
+      // 生活提醒與交代事項 (採用 items-start 搭配微調文字尺寸，單行與分行均自然和諧)
       const notContainer = document.getElementById("noticesContainer");
       const visibleNotices = (data.notices || []).filter(item => item.visible !== false);
       
@@ -653,11 +654,11 @@
         notContainer.innerHTML = `<div class="p-6 text-center text-slate-400 font-bold text-lg">暫無宣導事項</div>`;
       } else {
         notContainer.innerHTML = visibleNotices.map((item) => `
-          <div class="flex items-center gap-3.5 p-3.5 md:p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 shadow-xs">
-            <div class="w-7 h-7 rounded-full border-2 border-emerald-500 flex items-center justify-center text-emerald-600 font-black text-base flex-shrink-0">
+          <div class="flex items-start gap-3.5 p-3.5 md:p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 shadow-xs">
+            <div class="w-7 h-7 rounded-full border-2 border-emerald-500 flex items-center justify-center text-emerald-600 font-black text-base flex-shrink-0 mt-0.5 md:mt-0.5">
               ⓘ
             </div>
-            <span class="item-text font-bold text-slate-800 tracking-wide flex-1">
+            <span class="side-item-text font-bold text-slate-800 tracking-wide flex-1 leading-relaxed break-words">
               ${renderZhuyinHtml(item.content)}
             </span>
           </div>
@@ -665,7 +666,7 @@
       }
     }
 
-    // 字型切換：黑體 (截圖) -> 標楷體 -> 圓體
+    // 字型切換：黑體 (預設) -> 標楷體 -> 圓體
     function cycleFontFamily() {
       const fonts = ['sans', 'kai', 'round'];
       const labels = { sans: '黑體', kai: '標楷體', round: '圓體' };
